@@ -4,11 +4,11 @@ using Notify.API.Messages;
 
 namespace Notify.API.Hubs
 {
-    public class NotificationHub : Hub
+    public class NotificationHub : Hub<INotificationClient>
     {
         public async Task SendMessage(NotifyMessage message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", message);
+            await Clients.All.ReceiveMessage(message);
         }
     }
 }

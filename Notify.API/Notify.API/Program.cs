@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddSignalR();//.AddAzureSignalR("Endpoint=https://studyclix-test.service.signalr.net;AccessKey=t2++WBjHKX2aNg0BcBNvHKs9thC/YrBGiNXzEAtCkHo=;Version=1.0;");
+builder.Services.AddSignalR().AddAzureSignalR("Endpoint=https://studyclix-test.service.signalr.net;AccessKey=t2++WBjHKX2aNg0BcBNvHKs9thC/YrBGiNXzEAtCkHo=;Version=1.0;");
 
 var app = builder.Build();
 
