@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Notify.API.Hubs;
 
 namespace Notify.API._2.Controllers
 {
@@ -13,14 +15,17 @@ namespace Notify.API._2.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        private readonly IHubContext<NotificationHub, INotificationClient> _notify;
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IHubContext<NotificationHub, INotificationClient> ctx)
         {
             _logger = logger;
+            _notify = ctx;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IEnumerable<WeatherForecast>> Get()
         {
+            await _notify.Clients.All.ReceiveMessage(new Messages.NotifyMessage() { Message = "Second API Send Message to all" });
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
