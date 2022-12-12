@@ -5,13 +5,15 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notify.API", "Notify.API\Notify.API.csproj", "{68DCF4E6-C56B-4464-9C14-BB452E5FF92D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notify.API.2", "Notify.API.2\Notify.API.2.csproj", "{80DEB068-BCD9-44BF-BE01-9E354232A1D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notify.API.2", "Notify.API.2\Notify.API.2.csproj", "{80DEB068-BCD9-44BF-BE01-9E354232A1D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{C1B8282D-C34F-42BF-9B7F-DF66C15A2A2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notify.Domain", "Notify.Domain\Notify.Domain.csproj", "{14B60972-4E5A-44D6-98D6-A6802BD19886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notify.Domain", "Notify.Domain\Notify.Domain.csproj", "{14B60972-4E5A-44D6-98D6-A6802BD19886}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notify.SignalR", "Notify.SignalR\Notify.SignalR.csproj", "{8D2636FE-693F-48E2-8031-F511930A166F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notify.SignalR", "Notify.SignalR\Notify.SignalR.csproj", "{8D2636FE-693F-48E2-8031-F511930A166F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotifyFunction", "NotifyFunction\NotifyFunction.csproj", "{2B4F4543-A894-45C2-9A59-800C8218A26A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{8D2636FE-693F-48E2-8031-F511930A166F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D2636FE-693F-48E2-8031-F511930A166F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D2636FE-693F-48E2-8031-F511930A166F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B4F4543-A894-45C2-9A59-800C8218A26A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B4F4543-A894-45C2-9A59-800C8218A26A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B4F4543-A894-45C2-9A59-800C8218A26A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B4F4543-A894-45C2-9A59-800C8218A26A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

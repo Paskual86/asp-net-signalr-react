@@ -9,7 +9,7 @@ export const Notify = () => {
 
   useEffect(() => {
     const connect = new HubConnectionBuilder()
-      .withUrl('https://localhost:7128/hubs/notifications')
+      .withUrl('http://localhost:7261/api')
       .withAutomaticReconnect()
       .build();
 
@@ -21,7 +21,7 @@ export const Notify = () => {
       connection
         .start()
         .then(() => {
-          connection.on('ReceiveMessage', (message) => {
+          connection.on('newMessage', (message) => {
             console.log(message);
             setMessageReceived(message.message);
             notification.open({
