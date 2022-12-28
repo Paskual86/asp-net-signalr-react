@@ -11,46 +11,67 @@ using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Azure;
 using System.Net.Http;
 using System.Security.Principal;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace NotifyFunction
 {
     public static class Function
     {
+        /*
+         Accodridn this article we could set the user from two sites: 
+            https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-signalr-service-input?tabs=in-process&pivots=programming-language-csharp
+        using the headers:
+                    headers.x-ms-client-principal-id
+                    headers.x-ms-client-principal-name
+         */
         [FunctionName("negotiate")]
         public static SignalRConnectionInfo Negotiate(
             [HttpTrigger(AuthorizationLevel.Anonymous)] HttpRequest req,
-            [SignalRConnectionInfo(HubName = "serverless")] SignalRConnectionInfo connectionInfo)
+            [SignalRConnectionInfo(HubName = "serverless", UserId = "{headers.x-ms-client-principal-id}")] SignalRConnectionInfo connectionInfo)
         {
             Console.WriteLine(req.ToString());
+            Console.WriteLine("Started connection with the client...");
             return connectionInfo;
         }
         
+        [Authorize]
         [FunctionName("sendmessage")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             [SignalR(HubName = "serverless")] IAsyncCollector<SignalRMessage> signalRMessages,
-            ILogger log)
+            ILogger log, ClaimsPrincipal claimsPrincipal)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            string name = req.Query["name"];
+            string userID = req.Query["userId"];
+            string target = req.Query["target"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            await signalRMessages.AddAsync(
+            if (!string.IsNullOrEmpty(userID))
+            {
+                await signalRMessages.AddAsync(
                 new SignalRMessage
                 {
-                    Target = "newMessage",
+                    Target = target,
+                    UserId = userID,
                     Arguments = new[] { $"Test Message" }
                 });
-
-            return new OkObjectResult(responseMessage);
+            }
+            else
+            {
+                await signalRMessages.AddAsync(
+                new SignalRMessage
+                {
+                    Target = target,
+                    Arguments = new[] { $"Test Message" }
+                });
+            }
+            
+            
+            return new OkResult();
         }
 
 
