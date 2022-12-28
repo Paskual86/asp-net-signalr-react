@@ -10,5 +10,6 @@ namespace NotifyFunction.Models
     {
         public string Target { get; set; }
         public string Payload { get; set; }
+        public string Message { get; set; }
     }
 }

@@ -15,10 +15,10 @@ export const Notify = () => {
         .then(() => {
           connection.on('profile', (message) => {
             console.log(message);
-            setMessageReceived(message.message);
+            setMessageReceived(`Message Received: "${message}"`);
             notification.open({
               message: 'New Notification',
-              description: message.message,
+              description: message,
               onClick: () => {
                 console.log('Notification Clicked!');
               },
@@ -52,6 +52,7 @@ export const Notify = () => {
         .build();
 
       setConnection(connect);
+      setMessageReceived(`User: ${userId} connected`);
     }
   };
 
@@ -73,7 +74,7 @@ export const Notify = () => {
                 setUserId(input.target.value);
               }}
               style={{
-                margin: 10,
+                marginBottom: 20,
               }}
             />
             <Button onClick={connectSignalR} type="primary">
@@ -94,6 +95,9 @@ export const Notify = () => {
               value={inputText}
               onChange={(input) => {
                 setInputText(input.target.value);
+              }}
+              style={{
+                marginBottom: 20,
               }}
             />
             <Button onClick={sendMessage} type="primary">

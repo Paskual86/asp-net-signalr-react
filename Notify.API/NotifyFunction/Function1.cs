@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Security.Principal;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using NotifyFunction.Models;
 
 namespace NotifyFunction
 {
@@ -34,7 +35,7 @@ namespace NotifyFunction
             Console.WriteLine("Started connection with the client...");
             return connectionInfo;
         }
-        
+
         [Authorize]
         [FunctionName("sendmessage")]
         public static async Task<IActionResult> Run(
@@ -48,29 +49,28 @@ namespace NotifyFunction
             string target = req.Query["target"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            SignalRequest data = null;
+            if (!string.IsNullOrEmpty(requestBody))
+            {
+                data = JsonConvert.DeserializeObject<SignalRequest>(requestBody);
+            }
+
+            var signalMessage = new SignalRMessage();
 
             if (!string.IsNullOrEmpty(userID))
             {
-                await signalRMessages.AddAsync(
-                new SignalRMessage
-                {
-                    Target = target,
-                    UserId = userID,
-                    Arguments = new[] { $"Test Message" }
-                });
+                signalMessage.UserId = userID;
             }
-            else
+            if (!string.IsNullOrEmpty(target))
             {
-                await signalRMessages.AddAsync(
-                new SignalRMessage
-                {
-                    Target = target,
-                    Arguments = new[] { $"Test Message" }
-                });
+                signalMessage.Target = target;
             }
-            
-            
+            if (data != null)
+            {
+                signalMessage.Arguments = new[] { data.Message };
+            }
+            await signalRMessages.AddAsync(signalMessage);
+
             return new OkResult();
         }
 
