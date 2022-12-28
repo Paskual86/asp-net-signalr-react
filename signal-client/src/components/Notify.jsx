@@ -1,12 +1,15 @@
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Button, Input, notification, Card, Col, Row, Divider } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { UserOutlined } from '@ant-design/icons';
 
 export const Notify = () => {
   const [connection, setConnection] = useState(null);
-  const [inputText, setInputText] = useState('');
+  const [message, setMessage] = useState('');
+  const [userToSendMessage, setUserToSendMessage] = useState('');
   const [userId, setUserId] = useState('');
   const [messageReceived, setMessageReceived] = useState('');
+  const [connectedSuccessfully, setConnectedSuccessfully] = useState(false);
 
   useEffect(() => {
     if (connection) {
@@ -24,20 +27,34 @@ export const Notify = () => {
               },
             });
           });
+          setConnectedSuccessfully(true);
+          setMessageReceived(`User: ${userId} connected`);
         })
-        .catch((error) => console.log(error));
+        .catch((error) => {
+          setMessageReceived(`Error: ${error.message}`);
+          console.log(error);
+        });
     }
-  }, [connection]);
+  }, [connection, userId]);
 
   const sendMessage = async () => {
     if (connection) {
       console.log('Sending Message');
-      const result = await connection.send('SendMessage', {
+      fetch(
+        `http://localhost:7261/api/sendmessage?target=profile&userid=${userToSendMessage}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ message: message }),
+        }
+      ).then(() => {
+        console.log('Mssage sent');
+      });
+      /*const result = await connection.send('SendMessage', {
         message: inputText,
       });
-      console.log(result);
+      console.log(result);*/
     }
-    setInputText('');
+    setMessage('');
   };
 
   const connectSignalR = () => {
@@ -52,14 +69,13 @@ export const Notify = () => {
         .build();
 
       setConnection(connect);
-      setMessageReceived(`User: ${userId} connected`);
     }
   };
 
   return (
     <>
       <Row justify="center">
-        <Col span={12}>
+        {!connectedSuccessfully && (
           <Card
             title="Connect User"
             bordered={true}
@@ -76,13 +92,15 @@ export const Notify = () => {
               style={{
                 marginBottom: 20,
               }}
+              prefix={<UserOutlined />}
+              placeholder="User"
             />
             <Button onClick={connectSignalR} type="primary">
               Connect
             </Button>
           </Card>
-        </Col>
-        <Col span={12}>
+        )}
+        {connectedSuccessfully && (
           <Card
             title="Send Message"
             bordered={true}
@@ -92,19 +110,33 @@ export const Notify = () => {
             }}
           >
             <Input
-              value={inputText}
+              value={userToSendMessage}
               onChange={(input) => {
-                setInputText(input.target.value);
+                setUserToSendMessage(input.target.value);
               }}
               style={{
                 marginBottom: 20,
               }}
+              prefix={<UserOutlined />}
+              placeholder="User"
             />
+
+            <Input
+              value={message}
+              onChange={(input) => {
+                setMessage(input.target.value);
+              }}
+              style={{
+                marginBottom: 20,
+              }}
+              placeholder="Message"
+            />
+
             <Button onClick={sendMessage} type="primary">
               Send
             </Button>
           </Card>
-        </Col>
+        )}
       </Row>
       <Divider orientation="center">Messages</Divider>
       <Row justify="center">
