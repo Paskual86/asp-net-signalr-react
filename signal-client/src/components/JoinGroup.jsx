@@ -4,13 +4,17 @@ import { TeamOutlined } from '@ant-design/icons';
 
 const JoinGroup = ({ userId }) => {
   const [group, setGroup] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const onAddGroupHandler = () => {
+    setLoading(true);
     fetch(`http://localhost:7261/api/${group}/add/${userId}`, {
       method: 'POST',
-    }).then(() => {
-      console.log('Mssage sent');
-    });
+    })
+      .then(() => {})
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -33,7 +37,7 @@ const JoinGroup = ({ userId }) => {
         prefix={<TeamOutlined />}
         placeholder="User"
       />
-      <Button onClick={onAddGroupHandler} type="primary">
+      <Button onClick={onAddGroupHandler} type="primary" loading={loading}>
         Join
       </Button>
     </Card>

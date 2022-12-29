@@ -11,6 +11,7 @@ const JoinChat = ({
 }) => {
   const [connection, setConnection] = useState(null);
   const [userId, setUserId] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (connection) {
@@ -28,13 +29,16 @@ const JoinChat = ({
               },
             });
           });
+
           callbackConnectSuccessfully(true);
           callbackMessage(`User: ${userId} connected`);
           callbackUserId(userId);
+          setLoading(true);
         })
         .catch((error) => {
           callbackMessage(`Error: ${error.message}`);
           console.log(error);
+          setLoading(true);
         });
     }
   }, [
@@ -47,6 +51,7 @@ const JoinChat = ({
 
   const connectSignalR = () => {
     if (userId.trim().length > 0) {
+      setLoading(true);
       const connect = new HubConnectionBuilder()
         .withUrl('http://localhost:7261/api', {
           headers: {
@@ -80,7 +85,7 @@ const JoinChat = ({
         prefix={<UserOutlined />}
         placeholder="User"
       />
-      <Button onClick={connectSignalR} type="primary">
+      <Button onClick={connectSignalR} type="primary" loading={loading}>
         Connect
       </Button>
     </Card>
