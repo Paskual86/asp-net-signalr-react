@@ -29,11 +29,28 @@ namespace NotifyFunction
         [FunctionName("negotiate")]
         public static SignalRConnectionInfo Negotiate(
             [HttpTrigger(AuthorizationLevel.Anonymous)] HttpRequest req,
-            [SignalRConnectionInfo(HubName = "serverless", UserId = "{headers.x-ms-client-principal-id}")] SignalRConnectionInfo connectionInfo)
+            [SignalRConnectionInfo(HubName = "serverless", UserId = "{headers.x-ms-client-principal-id}"), ] SignalRConnectionInfo connectionInfo)
         {
             Console.WriteLine(req.ToString());
             Console.WriteLine("Started connection with the client...");
             return connectionInfo;
+        }
+
+
+        [FunctionName("AddToGroup")]
+        public static Task AddToGroup(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "{group}/add/{userId}")] HttpRequest req,
+        string group,
+        string userId,
+        [SignalR(HubName = "serverless")] IAsyncCollector<SignalRGroupAction> signalRGroupActions)
+        {
+            return signalRGroupActions.AddAsync(
+                new SignalRGroupAction
+                {
+                    UserId = userId,
+                    GroupName = group,
+                    Action = GroupAction.Add
+                });
         }
 
         [Authorize]
@@ -47,6 +64,7 @@ namespace NotifyFunction
 
             string userID = req.Query["userId"];
             string target = req.Query["target"];
+            string group = req.Query["group"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             SignalRequest data = null;
@@ -56,15 +74,27 @@ namespace NotifyFunction
             }
 
             var signalMessage = new SignalRMessage();
-
-            if (!string.IsNullOrEmpty(userID))
+            
+            if (!string.IsNullOrEmpty(group))
             {
-                signalMessage.UserId = userID;
+                signalMessage.GroupName = group;
             }
+            else
+            {
+                if (!string.IsNullOrEmpty(userID))
+                {
+                    signalMessage.UserId = userID;
+                }
+            }
+
             if (!string.IsNullOrEmpty(target))
             {
                 signalMessage.Target = target;
             }
+            else {
+                return new BadRequestObjectResult("The target could not be empty");
+            }
+
             if (data != null)
             {
                 signalMessage.Arguments = new[] { data.Message };
