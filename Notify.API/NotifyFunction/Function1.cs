@@ -14,6 +14,8 @@ using System.Security.Principal;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using NotifyFunction.Models;
+using Azure.Core;
+using Microsoft.Extensions.Configuration;
 
 namespace NotifyFunction
 {
@@ -26,20 +28,41 @@ namespace NotifyFunction
                     headers.x-ms-client-principal-id
                     headers.x-ms-client-principal-name
          */
-        [FunctionName("negotiate")]
+
+        // This way is knowing that "DECLARATIVE BINDING"
+        /*[FunctionName("negotiate")]
         public static SignalRConnectionInfo Negotiate(
-            [HttpTrigger(AuthorizationLevel.Anonymous)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function)] HttpRequest req,
             [SignalRConnectionInfo(HubName = "serverless", UserId = "{headers.x-ms-client-principal-id}"), ] SignalRConnectionInfo connectionInfo)
         {
             Console.WriteLine(req.ToString());
             Console.WriteLine("Started connection with the client...");
+            ClaimsPrincipal identities = req.HttpContext.User;
+            Console.WriteLine(identities.ToString());
+            return connectionInfo;
+        }*/
+
+        [FunctionName("negotiate")]
+        public static async Task<SignalRConnectionInfo> Negotiate(
+            [HttpTrigger(AuthorizationLevel.Function)] HttpRequest req,
+        IBinder binder)
+        {
+            string userId = req.Headers["x-ms-client-principal-id"];
+
+            var attribute = new SignalRConnectionInfoAttribute
+            {
+                HubName = "serverless",
+                UserId = userId
+            };
+            SignalRConnectionInfo connectionInfo = await binder.BindAsync<SignalRConnectionInfo>(attribute);
+
             return connectionInfo;
         }
 
 
         [FunctionName("AddToGroup")]
         public static Task AddToGroup(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "{group}/add/{userId}")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "{group}/add/{userId}")] HttpRequest req,
         string group,
         string userId,
         [SignalR(HubName = "serverless")] IAsyncCollector<SignalRGroupAction> signalRGroupActions)
@@ -56,11 +79,14 @@ namespace NotifyFunction
         [Authorize]
         [FunctionName("sendmessage")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Admin, "get", "post", Route = null)] HttpRequest req,
             [SignalR(HubName = "serverless")] IAsyncCollector<SignalRMessage> signalRMessages,
             ILogger log, ClaimsPrincipal claimsPrincipal)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
+            
+            ClaimsPrincipal identities = req.HttpContext.User;
+            Console.WriteLine(identities.ToString());
 
             string userID = req.Query["userId"];
             string target = req.Query["target"];
