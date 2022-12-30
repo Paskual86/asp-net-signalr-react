@@ -16,6 +16,7 @@ using System.Security.Claims;
 using NotifyFunction.Models;
 using Azure.Core;
 using Microsoft.Extensions.Configuration;
+using NotifyFunction.Binding;
 
 namespace NotifyFunction
 {
@@ -44,19 +45,27 @@ namespace NotifyFunction
 
         [FunctionName("negotiate")]
         public static async Task<SignalRConnectionInfo> Negotiate(
-            [HttpTrigger(AuthorizationLevel.Function)] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function)] HttpRequest req,
         IBinder binder)
         {
-            string userId = req.Headers["x-ms-client-principal-id"];
+            // https://www.codeguru.com/dotnet/asp-net-cookies/
+            // https://asp.mvc-tutorial.com/es/479/httpcontext/cookies/
+            var cookie = req.Headers["cookie"];
 
-            var attribute = new SignalRConnectionInfoAttribute
-            {
-                HubName = "serverless",
-                UserId = userId
-            };
-            SignalRConnectionInfo connectionInfo = await binder.BindAsync<SignalRConnectionInfo>(attribute);
-
-            return connectionInfo;
+            if ( !string.IsNullOrEmpty(cookie)) { 
+                string userId = req.Headers["x-ms-client-principal-id"];
+                //Console.WriteLine($"Request received for {accessTokenResult.Principal?.Identity.Name ?? "anonymous"}.");
+                var attribute = new SignalRConnectionInfoAttribute
+                {
+                    HubName = "serverless",
+                    UserId = userId
+                };
+                SignalRConnectionInfo connectionInfo = await binder.BindAsync<SignalRConnectionInfo>(attribute);
+                return connectionInfo;
+            }
+            else {
+                return null;
+            }
         }
 
 

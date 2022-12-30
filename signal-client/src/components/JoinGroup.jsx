@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Button, Input, Card } from 'antd';
 import { TeamOutlined } from '@ant-design/icons';
-
+const URL = 'http://localhost:7261/api';
 const JoinGroup = ({ userId }) => {
   const [group, setGroup] = useState('');
   const [loading, setLoading] = useState(false);
 
   const onAddGroupHandler = () => {
     setLoading(true);
-    fetch(`http://localhost:7261/api/${group}/add/${userId}`, {
+    fetch(`${URL}/${group}/add/${userId}`, {
       method: 'POST',
     })
       .then(() => {})

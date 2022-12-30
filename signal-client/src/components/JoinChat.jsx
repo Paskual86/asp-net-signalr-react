@@ -3,7 +3,8 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import { Button, Input, notification, Card } from 'antd';
 
 import { UserOutlined } from '@ant-design/icons';
-
+//const URL = 'http://localhost:7261/api';
+const URL = 'https://localhost:44363/signalr/api';
 const JoinChat = ({
   callbackConnectSuccessfully,
   callbackMessage,
@@ -33,12 +34,13 @@ const JoinChat = ({
           callbackConnectSuccessfully(true);
           callbackMessage(`User: ${userId} connected`);
           callbackUserId(userId);
-          setLoading(true);
         })
         .catch((error) => {
           callbackMessage(`Error: ${error.message}`);
           console.log(error);
-          setLoading(true);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   }, [
@@ -53,7 +55,7 @@ const JoinChat = ({
     if (userId.trim().length > 0) {
       setLoading(true);
       const connect = new HubConnectionBuilder()
-        .withUrl('http://localhost:7261/api', {
+        .withUrl(`${URL}`, {
           headers: {
             'x-ms-client-principal-id': userId,
           },
